@@ -9,7 +9,7 @@ module.exports = function(size, width, height) {
     this.cells[i] = new Array(size);
     for (var j = 0; j < size; j++) {
       this.cells[i][j] = new Cell(i, j, width, height);
-      this.cells[i][j].setAlive(Math.random() > 0.5 ? true : false);
+      this.cells[i][j].setAlive(Math.random() > 0.8 ? true : false);
     }
   }
 
@@ -26,35 +26,33 @@ module.exports = function(size, width, height) {
     return numberOfLiveNeighbours;
   }
 
-  this.draw = function(ctx) {
-    if (this.currentFrame != this.transitionTime) {
-      // Render the Transition
-      this.currentFrame = this.currentFrame + 10;
-    } else {
-      this.currentFrame = 0;
-    }
+  this.draw = function(ctx, forward) {
+    var increment = forward ? 50 : -50;
+    // Check the current frame and increment till the transition time
+    this.currentFrame = this.currentFrame != this.transitionTime ? this.currentFrame + increment : 0;
     var aliveCells = 0;
-    var newCells = this.cells;
+    // Iterate all the cells in the world
     for (var i = 0; i < size; i++) {
       for (var j = 0; j < size; j++) {
-        var neighbours = this.findLiveNeighbours(i, j);
+        if (this.currentFrame != this.transitionTime) {
+          this.cells[i][j].setNeighbours(this.findLiveNeighbours(i, j));
+        }
         if (this.cells[i][j].isAlive()) {
-          if (neighbours < 2 || neighbours > 3) {
-            ctx.fillStyle = "rgba(0, 0, 200, " + (200 - this.currentFrame) / 200 + ")";
-            if (this.currentFrame == 200) {
+          ctx.fillStyle = "rgba(0, 0, 200, 0.9)";
+          if (this.cells[i][j].getNeighbours() < 2 || this.cells[i][j].getNeighbours() > 3) {
+            // This cell must fade out as it is dying and will be flaged as dead soon
+            ctx.fillStyle = "rgba(0, 0, 200, " + (this.transitionTime - this.currentFrame) / this.transitionTime + ")";
+            if (this.currentFrame == this.transitionTime) {
               this.cells[i][j].setAlive(false);
             }
-          } else {
-            ctx.fillStyle = "rgba(0, 0, 200, 1)";
           }
         } else {
-          if (neighbours == 3) {
-            ctx.fillStyle = "rgba(0, 0, 200, " + this.currentFrame / 200 + ")";
-            if (this.currentFrame == 200) {
+          ctx.fillStyle = "white";
+          if (this.cells[i][j].getNeighbours() == 3) {
+            ctx.fillStyle = "rgba(0, 0, 200, " + this.currentFrame / this.transitionTime + ")";
+            if (this.currentFrame == this.transitionTime) {
               this.cells[i][j].setAlive(true);
             }
-          } else {
-            ctx.fillStyle = "white";
           }
         }
         this.cells[i][j].draw(ctx);

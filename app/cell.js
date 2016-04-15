@@ -4,6 +4,7 @@ module.exports = function(x, y, width, height) {
   this.width = width;
   this.height = height;
   this.alive = false;
+  this.neighbours = 0;
 
   this.setAlive = function(alive) {
     this.alive = alive;
@@ -13,9 +14,15 @@ module.exports = function(x, y, width, height) {
     return this.alive;
   }
 
+  this.setNeighbours = function(neighbours) {
+    this.neighbours = neighbours;
+  }
+
+  this.getNeighbours = function() {
+    return this.neighbours;
+  }
+
   this.draw = function(ctx) {
-    // if (this.alive) {
-      ctx.fillRect(x * width, y * height, width, height);
-    // }
+    ctx.fillRect(x * width, y * height, width, height);    
   }
 };
